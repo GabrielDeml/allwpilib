@@ -22,6 +22,10 @@ typedef void (*CancelCallbackChannelFunc)(int32_t index, int32_t channel,
                                           int32_t uid);
 
 void CallbackStoreThunk(const char* name, void* param, const HAL_Value* value);
+void ConstBufferCallbackStoreThunk(const char* name, void* param,
+                                 const unsigned char* buffer,
+                                 unsigned int count);
+
 
 class CallbackStore {
  public:
@@ -69,6 +73,10 @@ class CallbackStore {
 
   friend void CallbackStoreThunk(const char* name, void* param,
                                  const HAL_Value* value);
+
+  friend void ConstBufferCallbackStoreThunk(const char* name, void* param,
+                                 const unsigned char* buffer,
+                                 unsigned int count);
 
  private:
   int32_t index;

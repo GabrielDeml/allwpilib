@@ -78,7 +78,7 @@ class AddressableLEDSim {
     auto store = std::make_unique<CallbackStore>(
         m_index, -1, callback, &HALSIM_CancelAddressableLEDRunningCallback);
     store->SetUid(HALSIM_RegisterAddressableLEDRunningCallback(
-        m_index, &CallbackStoreThunk, store.get(), initialNotify));
+        m_index, &ConstBufferCallbackStoreThunk, store.get(), initialNotify));
     return store;
   }
 
