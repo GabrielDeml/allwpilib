@@ -26,6 +26,7 @@
 #include "portable-file-dialogs.h"
 
 using namespace halsimgui;
+//using namespace Mechanism2D;
 
 int windowWidth = 100;
 int windowHeight = 100;
@@ -35,24 +36,8 @@ static wpi::StringMap<ImColor> colorLookUpTable;
 static std::unique_ptr<pfd::open_file> m_fileOpener;
 static std::string previousJsonLocation = "Not empty";
 
-struct BodyConfig {
-  std::string name;
-  std::string type = "line";
-  // TODO: use this
-  int startLocation = 0;
-  int length = 100;
-  std::string color = "green";
-  int angle = 0;
-  std::vector<BodyConfig> children;
-  int lineWidth = 1;
-};
-std::vector<BodyConfig> bodyConfigVector;
 
-struct DrawLineStruct {
-  float xEnd;
-  float yEnd;
-  float angle;
-};
+
 
 static struct NamedColor {
   const char* name;
@@ -74,7 +59,7 @@ static struct NamedColor {
                     {"fuchsia", IM_COL32(255, 0, 255, 255)},
                     {"purple", IM_COL32(128, 0, 128, 255)}};
 
-static void buildColorTable() {
+ void Mechanism2D::buildColorTable() {
   for (auto&& namedColor : staticColors) {
     colorLookUpTable.try_emplace(namedColor.name, namedColor.value);
   }
@@ -87,7 +72,7 @@ class Mechanism2DInfo {
 
 static Mechanism2DInfo mechanism2DInfo;
 
-bool ReadIni(wpi::StringRef name, wpi::StringRef value) {
+bool Mechanism2D::ReadIni(wpi::StringRef name, wpi::StringRef value) {
   if (name == "jsonLocation") {
     mechanism2DInfo.jsonLocation = value;
   } else {
@@ -96,7 +81,7 @@ bool ReadIni(wpi::StringRef name, wpi::StringRef value) {
   return true;
 }
 
-void WriteIni(ImGuiTextBuffer* out) {
+void Mechanism2D::WriteIni(ImGuiTextBuffer* out) {
   out->appendf("[Mechanism2D][Mechanism2D]\njsonLocation=%s\n\n",
                mechanism2DInfo.jsonLocation.c_str());
 }
@@ -109,7 +94,7 @@ static void* Mechanism2DReadOpen(ImGuiContext* ctx,
   return nullptr;
 }
 
-static void Mechanism2DReadLine(ImGuiContext* ctx,
+void Mechanism2D::Mechanism2DReadLine(ImGuiContext* ctx,
                                   ImGuiSettingsHandler* handler, void* entry,
                                   const char* lineStr) {
   wpi::StringRef line{lineStr};
@@ -125,7 +110,7 @@ static void Mechanism2DWriteAll(ImGuiContext* ctx,
   WriteIni(out_buf);
 }
 
-void GetJsonFileLocation() {
+void Mechanism2D::GetJsonFileLocation() {
   if (m_fileOpener && m_fileOpener->ready(0)) {
     auto result = m_fileOpener->result();
     if (!result.empty()) {
@@ -136,7 +121,7 @@ void GetJsonFileLocation() {
   }
 }
 
-DrawLineStruct DrawLine(float startXLocation, float startYLocation, int length,
+DrawLineStruct Mechanism2D::DrawLine(float startXLocation, float startYLocation, int length,
                         float angle, ImDrawList* drawList, ImVec2 windowPos,
                         ImColor color, const BodyConfig& bodyConfig,
                         const std::string& previousPath) {
@@ -158,7 +143,7 @@ DrawLineStruct DrawLine(float startXLocation, float startYLocation, int length,
   return drawLineStruct;
 }
 
-static void buildDrawList(float startXLocation, float startYLocation,
+void buildDrawList(float startXLocation, float startYLocation,
                           ImDrawList* drawList, float previousAngle,
                           const std::vector<BodyConfig>& subBodyConfigs,
                           ImVec2 windowPos) {
@@ -205,7 +190,7 @@ static void buildDrawList(float startXLocation, float startYLocation,
   }
 }
 
-BodyConfig readSubJson(const std::string& name, wpi::json const& body) {
+BodyConfig Mechanism2D::readSubJson(const std::string& name, wpi::json const& body) {
   BodyConfig c;
   try {
     c.name = name + body.at("name").get<std::string>() + "/";
@@ -259,7 +244,7 @@ BodyConfig readSubJson(const std::string& name, wpi::json const& body) {
   return c;
 }
 
-static void readJson(std::string jFile) {
+static void Mechanism2D::readJson(std::string jFile) {
   std::error_code ec;
   std::string name;
   wpi::raw_fd_istream is(jFile, ec);
@@ -303,7 +288,7 @@ static void OptionMenuLocateJson() {
   }
 }
 
-static void DisplayAssembly2D() {
+static void Mechanism2D::DisplayAssembly2D() {
   GetJsonFileLocation();
   if (!mechanism2DInfo.jsonLocation.empty()) {
     // Only read the json file if it changed
